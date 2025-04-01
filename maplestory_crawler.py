@@ -85,11 +85,14 @@ def main():
             for announcement in announcements:
                 if announcement["startDate"] == today:  # 只檢查今天發表的公告
                     print(f"檢查今天公告: {announcement['title']}")
-                    if "開機公告" in announcement["title"]:
+                    # 檢查是否為「開機公告」且不包含「延後」
+                    if "開機公告" in announcement["title"] and "延後" not in announcement["title"]:
                         print(f"找到符合條件的公告: {announcement['title']}")
                         if send_email(announcement["title"]):
                             found_opening = True
                             break  # 找到後跳出內層迴圈
+                    elif "開機公告" in announcement["title"] and "延後" in announcement["title"]:
+                        print(f"檢測到延後開機公告，已忽略: {announcement['title']}")
             
             # 如果找到開機公告並成功發送郵件，停止程式
             if found_opening:
