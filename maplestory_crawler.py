@@ -4,6 +4,7 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime
+import random
 
 # API 請求相關設定
 URL = "https://maplestory.beanfun.com/main?handler=BulletinProxy"
@@ -108,8 +109,7 @@ def main():
         except Exception as e:
             print(f"未知錯誤: {e}")
 
-        # 每 30 秒執行一次
-        time.sleep(30)
+        time.sleep(random.uniform(10, 15)) # 隨機休息 10 到 15 秒之間
 
 if __name__ == "__main__":
     if not SMTP_USERNAME or not SMTP_APP_PASSWORD:
