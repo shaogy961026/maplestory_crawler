@@ -86,12 +86,23 @@ def main():
             for announcement in announcements:
                 if announcement["startDate"] == today:  # 只檢查今天發表的公告
                     print(f"檢查今天公告: {announcement['title']}")
+                    
                     # 檢查是否為「開機公告」且不包含「延後」
                     if "開機公告" in announcement["title"] and "延後" not in announcement["title"]:
-                        print(f"找到符合條件的公告: {announcement['title']}")
+                        
+                        # --- 醒目的輸出區塊開始 ---
+                        print("\n" + "🌟" * 30)
+                        print("\033[1;37;41m" + "                                                            " + "\033[0m")
+                        print("\033[1;37;41m" + "                 ！！！！找到開機公告！！！！                 " + "\033[0m")
+                        print("\033[1;37;41m" + "                                                            " + "\033[0m")
+                        print(f"\033[1;33m👉 公告標題: {announcement['title']}\033[0m")
+                        print("🌟" * 30 + "\n")
+                        # --- 醒目的輸出區塊結束 ---
+                        
                         if send_email(announcement["title"]):
                             found_opening = True
                             break  # 找到後跳出內層迴圈
+                            
                     elif "開機公告" in announcement["title"] and "延後" in announcement["title"]:
                         print(f"檢測到延後開機公告，已忽略: {announcement['title']}")
             
