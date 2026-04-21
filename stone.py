@@ -94,6 +94,7 @@ class GameTimerApp:
             if pygame.mixer.music.get_busy():
                 return
             pygame.mixer.music.load(self.music_file)
+            pygame.mixer.music.set_volume(0.05)
             pygame.mixer.music.play(-1) 
         except Exception as e:
             print(f"無法播放音樂: {e}")
