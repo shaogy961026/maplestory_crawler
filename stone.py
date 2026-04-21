@@ -10,13 +10,14 @@ class GameTimerApp:
         self.root.attributes('-alpha', 0.8) 
         # 設定視窗永遠置頂
         self.root.attributes('-topmost', True) 
-        # 稍微加高與加寬視窗，以容納新增的按鈕
-        self.root.geometry("280x150") 
+        # 調整視窗大小以容納三個計時器與三個按鈕
+        self.root.geometry("320x180") 
         self.root.resizable(False, False)
 
         # 時間變數初始化
         self.total_seconds = 0
-        self.countdown_seconds = 300  # 5分鐘 = 300秒
+        self.countdown_seconds = 300       # 5分鐘 = 300秒
+        self.countdown_10m_seconds = 600   # 10分鐘 = 600秒
         self.is_popup_open = False
 
         # 設定字型
@@ -25,23 +26,31 @@ class GameTimerApp:
 
         # 總時間標籤
         self.total_label = tk.Label(root, text="總時間: 00:00:00", font=custom_font)
-        self.total_label.pack(pady=8)
+        self.total_label.pack(pady=5)
 
-        # 倒數計時標籤
-        self.countdown_label = tk.Label(root, text="倒數: 05:00", font=custom_font, fg="red")
+        # 5分鐘倒數計時標籤 (紅色)
+        self.countdown_label = tk.Label(root, text="五分倒數: 05:00", font=custom_font, fg="red")
         self.countdown_label.pack(pady=2)
+
+        # 10分鐘倒數計時標籤 (藍色)
+        self.countdown_10m_label = tk.Label(root, text="十分倒數: 10:00", font=custom_font, fg="#0066cc")
+        self.countdown_10m_label.pack(pady=2)
 
         # 建立一個框架來放置按鈕，讓它們水平並排
         btn_frame = tk.Frame(root)
-        btn_frame.pack(pady=10)
+        btn_frame.pack(pady=8)
 
         # 重置總時間按鈕
         self.btn_reset_total = tk.Button(btn_frame, text="重置總時", font=btn_font, command=self.reset_total_time)
-        self.btn_reset_total.grid(row=0, column=0, padx=10)
+        self.btn_reset_total.grid(row=0, column=0, padx=6)
 
-        # 重置倒數按鈕
-        self.btn_reset_cd = tk.Button(btn_frame, text="重置倒數", font=btn_font, command=self.reset_countdown_time)
-        self.btn_reset_cd.grid(row=0, column=1, padx=10)
+        # 重置5分倒數按鈕
+        self.btn_reset_cd = tk.Button(btn_frame, text="重置五分", font=btn_font, command=self.reset_countdown_time)
+        self.btn_reset_cd.grid(row=0, column=1, padx=6)
+
+        # 重置10分倒數按鈕
+        self.btn_reset_10m = tk.Button(btn_frame, text="重置十分", font=btn_font, command=self.reset_10m_time)
+        self.btn_reset_10m.grid(row=0, column=2, padx=6)
 
         # 啟動計時器迴圈
         self.update_timer()
@@ -62,13 +71,18 @@ class GameTimerApp:
         self.total_seconds += 1
         self.total_label.config(text=f"總時間: {self.format_total_time(self.total_seconds)}")
 
-        # 如果彈窗沒有開啟，才進行倒數
+        # 5分鐘倒數邏輯 (受彈窗影響)
         if not self.is_popup_open:
             if self.countdown_seconds > 0:
                 self.countdown_seconds -= 1
-                self.countdown_label.config(text=f"倒數: {self.format_countdown_time(self.countdown_seconds)}")
+                self.countdown_label.config(text=f"五分倒數: {self.format_countdown_time(self.countdown_seconds)}")
             else:
                 self.show_popup()
+
+        # 10分鐘倒數邏輯 (獨立計算，不受彈窗影響)
+        if self.countdown_10m_seconds > 0:
+            self.countdown_10m_seconds -= 1
+            self.countdown_10m_label.config(text=f"十分倒數: {self.format_countdown_time(self.countdown_10m_seconds)}")
 
         # 設定 1000 毫秒 (1秒) 後再次執行此函數
         self.root.after(1000, self.update_timer)
@@ -108,10 +122,10 @@ class GameTimerApp:
         self.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
 
     def close_popup(self):
-        """關閉彈窗並重置計時器"""
+        """關閉彈窗並重置5分鐘計時器"""
         self.popup.destroy()
         self.countdown_seconds = 300 
-        self.countdown_label.config(text=f"倒數: {self.format_countdown_time(self.countdown_seconds)}")
+        self.countdown_label.config(text=f"五分倒數: {self.format_countdown_time(self.countdown_seconds)}")
         self.is_popup_open = False
 
     def reset_total_time(self):
@@ -120,14 +134,17 @@ class GameTimerApp:
         self.total_label.config(text=f"總時間: {self.format_total_time(self.total_seconds)}")
 
     def reset_countdown_time(self):
-        """手動重置倒數時間"""
+        """手動重置5分鐘倒數時間"""
         if self.is_popup_open:
-            # 如果提醒視窗正開著，直接當作點擊了確認來關閉並重置
             self.close_popup()
         else:
-            # 否則單純重置倒數時間
             self.countdown_seconds = 300
-            self.countdown_label.config(text=f"倒數: {self.format_countdown_time(self.countdown_seconds)}")
+            self.countdown_label.config(text=f"五分倒數: {self.format_countdown_time(self.countdown_seconds)}")
+
+    def reset_10m_time(self):
+        """手動重置10分鐘倒數時間"""
+        self.countdown_10m_seconds = 600
+        self.countdown_10m_label.config(text=f"十分倒數: {self.format_countdown_time(self.countdown_10m_seconds)}")
 
 if __name__ == "__main__":
     root = tk.Tk()
