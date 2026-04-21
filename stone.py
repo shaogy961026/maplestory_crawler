@@ -10,7 +10,8 @@ class GameTimerApp:
         self.root.attributes('-alpha', 0.8) 
         # 設定視窗永遠置頂
         self.root.attributes('-topmost', True) 
-        self.root.geometry("250x120")
+        # 稍微加高與加寬視窗，以容納新增的按鈕
+        self.root.geometry("280x150") 
         self.root.resizable(False, False)
 
         # 時間變數初始化
@@ -20,14 +21,27 @@ class GameTimerApp:
 
         # 設定字型
         custom_font = font.Font(size=14, weight="bold")
+        btn_font = font.Font(family="微軟正黑體", size=10)
 
         # 總時間標籤
         self.total_label = tk.Label(root, text="總時間: 00:00:00", font=custom_font)
-        self.total_label.pack(pady=10)
+        self.total_label.pack(pady=8)
 
         # 倒數計時標籤
         self.countdown_label = tk.Label(root, text="倒數: 05:00", font=custom_font, fg="red")
-        self.countdown_label.pack(pady=5)
+        self.countdown_label.pack(pady=2)
+
+        # 建立一個框架來放置按鈕，讓它們水平並排
+        btn_frame = tk.Frame(root)
+        btn_frame.pack(pady=10)
+
+        # 重置總時間按鈕
+        self.btn_reset_total = tk.Button(btn_frame, text="重置總時", font=btn_font, command=self.reset_total_time)
+        self.btn_reset_total.grid(row=0, column=0, padx=10)
+
+        # 重置倒數按鈕
+        self.btn_reset_cd = tk.Button(btn_frame, text="重置倒數", font=btn_font, command=self.reset_countdown_time)
+        self.btn_reset_cd.grid(row=0, column=1, padx=10)
 
         # 啟動計時器迴圈
         self.update_timer()
@@ -67,14 +81,14 @@ class GameTimerApp:
         self.popup = tk.Toplevel(self.root)
         self.popup.title("!!! 提醒 !!!")
         self.popup.geometry("300x150")
-        self.popup.attributes('-topmost', True) # 彈窗也永遠置頂
-        self.popup.attributes('-alpha', 0.95)   # 彈窗稍微不透明一點以引起注意
+        self.popup.attributes('-topmost', True) 
+        self.popup.attributes('-alpha', 0.95)   
         self.popup.resizable(False, False)
 
         # 彈窗文字內容
         lbl = tk.Label(
             self.popup, 
-            text="五分鐘到", 
+            text="請擊殺鎖水怪 放輪BUFF", 
             font=("微軟正黑體", 16, "bold"), 
             fg="blue"
         )
@@ -91,17 +105,29 @@ class GameTimerApp:
         )
         btn.pack(pady=10)
 
-        # 綁定視窗右上角的 'X' 關閉事件與確認按鈕相同邏輯
         self.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
 
     def close_popup(self):
         """關閉彈窗並重置計時器"""
         self.popup.destroy()
-        # 重新設定倒數 5 分鐘
-        self.countdown_seconds = 300
+        self.countdown_seconds = 300 
         self.countdown_label.config(text=f"倒數: {self.format_countdown_time(self.countdown_seconds)}")
-        # 標記彈窗已關閉，讓倒數重新開始
         self.is_popup_open = False
+
+    def reset_total_time(self):
+        """手動重置總時間"""
+        self.total_seconds = 0
+        self.total_label.config(text=f"總時間: {self.format_total_time(self.total_seconds)}")
+
+    def reset_countdown_time(self):
+        """手動重置倒數時間"""
+        if self.is_popup_open:
+            # 如果提醒視窗正開著，直接當作點擊了確認來關閉並重置
+            self.close_popup()
+        else:
+            # 否則單純重置倒數時間
+            self.countdown_seconds = 300
+            self.countdown_label.config(text=f"倒數: {self.format_countdown_time(self.countdown_seconds)}")
 
 if __name__ == "__main__":
     root = tk.Tk()
