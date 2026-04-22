@@ -32,6 +32,7 @@ class GameTimerApp:
         self.countdown_seconds = self.TIMER_1_SECONDS       
         self.countdown_10m_seconds = self.TIMER_2_SECONDS   
         self.is_popup_open = False
+        self.is_10m_popup_open = False # 新增：十分鐘彈窗狀態
 
         # 設定字型
         custom_font = font.Font(size=14, weight="bold")
@@ -80,10 +81,13 @@ class GameTimerApp:
             else:
                 self.show_popup()
 
-        # 第二組倒數邏輯 (獨立計算)
-        if self.countdown_10m_seconds > 0:
-            self.countdown_10m_seconds -= 1
-            self.countdown_10m_label.config(text=f"十分倒數: {self.format_time(self.countdown_10m_seconds)}")
+        # 第二組倒數邏輯 (新增：受彈窗影響)
+        if not self.is_10m_popup_open:
+            if self.countdown_10m_seconds > 0:
+                self.countdown_10m_seconds -= 1
+                self.countdown_10m_label.config(text=f"十分倒數: {self.format_time(self.countdown_10m_seconds)}")
+            else:
+                self.show_10m_popup()
 
         # 設定 1 秒後再次執行此函數
         self.root.after(1000, self.update_timer)
@@ -104,7 +108,7 @@ class GameTimerApp:
         pygame.mixer.music.stop()
 
     def show_popup(self):
-        """顯示提醒彈窗並播放音樂"""
+        """顯示五分鐘提醒彈窗並播放音樂"""
         self.is_popup_open = True
         self.play_music() 
         
@@ -114,18 +118,42 @@ class GameTimerApp:
         self.popup.attributes('-topmost', True)
         self.popup.attributes('-alpha', 0.95)
 
-        tk.Label(self.popup, text="五分鐘到", font=("微軟正黑體", 16, "bold"), fg="blue").pack(expand=True, pady=10)
+        tk.Label(self.popup, text="五分鐘到", font=("微軟正黑體", 16, "bold"), fg="red").pack(expand=True, pady=10)
         tk.Button(self.popup, text="確認", font=("微軟正黑體", 14), command=self.close_popup, width=10).pack(pady=10)
 
         self.popup.protocol("WM_DELETE_WINDOW", self.close_popup)
 
     def close_popup(self):
-        """關閉彈窗"""
+        """關閉五分鐘彈窗"""
         self.stop_music() 
         self.popup.destroy()
         self.countdown_seconds = self.TIMER_1_SECONDS 
         self.countdown_label.config(text=f"五分倒數: {self.format_time(self.countdown_seconds)}")
         self.is_popup_open = False
+
+    def show_10m_popup(self):
+        """顯示十分鐘提醒彈窗並播放音樂"""
+        self.is_10m_popup_open = True
+        self.play_music() 
+        
+        self.popup_10m = tk.Toplevel(self.root)
+        self.popup_10m.title("提醒")
+        self.popup_10m.geometry("300x150")
+        self.popup_10m.attributes('-topmost', True)
+        self.popup_10m.attributes('-alpha', 0.95)
+
+        tk.Label(self.popup_10m, text="十分鐘到", font=("微軟正黑體", 16, "bold"), fg="#0066cc").pack(expand=True, pady=10)
+        tk.Button(self.popup_10m, text="確認", font=("微軟正黑體", 14), command=self.close_10m_popup, width=10).pack(pady=10)
+
+        self.popup_10m.protocol("WM_DELETE_WINDOW", self.close_10m_popup)
+
+    def close_10m_popup(self):
+        """關閉十分鐘彈窗"""
+        self.stop_music() 
+        self.popup_10m.destroy()
+        self.countdown_10m_seconds = self.TIMER_2_SECONDS 
+        self.countdown_10m_label.config(text=f"十分倒數: {self.format_time(self.countdown_10m_seconds)}")
+        self.is_10m_popup_open = False
 
     def reset_total_time(self):
         """手動重置總時間"""
@@ -142,8 +170,11 @@ class GameTimerApp:
 
     def reset_10m_time(self):
         """手動重置第二組倒數"""
-        self.countdown_10m_seconds = self.TIMER_2_SECONDS
-        self.countdown_10m_label.config(text=f"十分倒數: {self.format_time(self.TIMER_2_SECONDS)}")
+        if self.is_10m_popup_open:
+            self.close_10m_popup()
+        else:
+            self.countdown_10m_seconds = self.TIMER_2_SECONDS
+            self.countdown_10m_label.config(text=f"十分倒數: {self.format_time(self.TIMER_2_SECONDS)}")
 
 if __name__ == "__main__":
     root = tk.Tk()
